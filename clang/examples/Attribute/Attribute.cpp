@@ -30,6 +30,7 @@ struct ExampleAttrInfo : public ParsedAttrInfo {
     // GNU-style __attribute__(("example")) and C++-style [[example]] and
     // [[plugin::example]] supported.
     static constexpr Spelling S[] = {{ParsedAttr::AS_GNU, "example"},
+                                     {ParsedAttr::AS_C2x, "example"},
                                      {ParsedAttr::AS_CXX11, "example"},
                                      {ParsedAttr::AS_CXX11, "plugin::example"}};
     Spellings = S;
