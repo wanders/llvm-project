@@ -2791,6 +2791,8 @@ static bool mergeDeclAttribute(Sema &S, NamedDecl *D,
   if (!DiagnoseMutualExclusions(S, D, Attr))
     return false;
 
+  // MUST THIS DELEGATE TO PLUGIN?
+
   // This function copies an attribute Attr from a previous declaration to the
   // new declaration D if the new declaration doesn't itself have that attribute
   // yet or if that attribute allows duplicates.

@@ -749,6 +749,9 @@ void Sema::InstantiateAttrs(const MultiLevelTemplateArgumentList &TemplateArgs,
     if (!isRelevantAttr(*this, New, TmplAttr))
       continue;
 
+  // MUST THIS DELEGATE TO PLUGIN?
+
+
     // FIXME: This should be generalized to more than just the AlignedAttr.
     const AlignedAttr *Aligned = dyn_cast<AlignedAttr>(TmplAttr);
     if (Aligned && Aligned->isAlignmentDependent()) {

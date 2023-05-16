@@ -2710,6 +2710,9 @@ static void emitAttributes(const RecordKeeper &Records, raw_ostream &OS,
     if (!R.getValueAsBit("ASTNode"))
       continue;
 
+    if (!Header && R.getValueAsBit("OnlyCustomMembers"))
+      continue;
+
     ArrayRef<std::pair<const Record *, SMRange>> Supers = R.getSuperClasses();
     assert(!Supers.empty() && "Forgot to specify a superclass for the attr");
     std::string SuperName;
@@ -2722,11 +2725,20 @@ static void emitAttributes(const RecordKeeper &Records, raw_ostream &OS,
         Inheritable = true;
     }
 
-    if (Header)
-      OS << "class CLANG_ABI " << R.getName() << "Attr : public " << SuperName
-         << " {\n";
-    else
+    if (Header) {
+      OS << "class CLANG_ABI " << R.getName() << "Attr : public " << SuperName;
+      for (auto &ES : R.getValueAsListOfStrings("ExtraSupers")) {
+	OS << ", " << ES;
+      }
+      OS << " {\n";
+      if (R.getValueAsBit("OnlyCustomMembers")) {
+	OS << R.getValueAsString("AdditionalMembers");
+	OS << "\n\n};\n\n";
+	continue;
+      }
+    } else {
       OS << "\n// " << R.getName() << "Attr implementation\n\n";
+    }
 
     std::vector<const Record *> ArgRecords = R.getValueAsListOfDefs("Args");
     std::vector<std::unique_ptr<Argument>> Args;
@@ -3493,6 +3505,12 @@ void EmitClangAttrPCHRead(const RecordKeeper &Records, raw_ostream &OS) {
       continue;
 
     OS << "  case attr::" << R.getName() << ": {\n";
+    if (R.getValueAsBit("OnlyCustomMembers")) {
+      OS << "    assert(false && \"Can't deserialize plugin attrs\");\n"
+	 << "    break;\n"
+	 << "    }\n";
+      continue;
+    }
     if (R.isSubClassOf(InhClass))
       OS << "    bool isInherited = Record.readInt();\n";
     OS << "    bool isImplicit = Record.readInt();\n";

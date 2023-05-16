@@ -270,4 +270,6 @@ unsigned AlignedAttr::getAlignment(ASTContext &Ctx) const {
   return Ctx.getTargetDefaultAlignForAttributeAligned();
 }
 
+char InternalPluginBaseAttr::ID = 0;
+
 #include "clang/AST/AttrImpl.inc"

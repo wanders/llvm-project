@@ -92,14 +92,19 @@ void TextNodeDumper::Visit(const Attr *A) {
   {
     ColorScope Color(OS, ShowColors, AttrColor);
 
-    switch (A->getKind()) {
+    if (const InternalPluginBaseAttr *PA = dyn_cast<InternalPluginBaseAttr>(A)) {
+      OS << PA->getName();
+    } else {
+
+      switch (A->getKind()) {
 #define ATTR(X)                                                                \
   case attr::X:                                                                \
     OS << #X;                                                                  \
     break;
 #include "clang/Basic/AttrList.inc"
     }
-    OS << "Attr";
+      OS << "Attr";
+    }
   }
   dumpPointer(A);
   dumpSourceRange(A->getRange());

@@ -18851,6 +18851,9 @@ bool Sema::checkThisInStaticMemberFunctionExceptionSpec(CXXMethodDecl *Method) {
 bool Sema::checkThisInStaticMemberFunctionAttributes(CXXMethodDecl *Method) {
   FindCXXThisExpr Finder(*this);
 
+    // MUST THIS DELEGATE TO PLUGIN?
+
+
   // Check attributes.
   for (const auto *A : Method->attrs()) {
     // FIXME: This should be emitted by tblgen.

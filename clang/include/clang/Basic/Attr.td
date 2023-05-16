@@ -713,6 +713,11 @@ class Attr {
   // attribute may be documented under multiple categories, more than one
   // Documentation entry may be listed.
   list<Documentation> Documentation;
+
+  //
+  list<string> ExtraSupers = [];
+  // 
+  bit OnlyCustomMembers = 0;
 }
 
 /// Used to define a set of mutually exclusive attributes.
@@ -785,6 +790,40 @@ class IgnoredAttr : Attr {
   let SemaHandler = 0;
   let Documentation = [InternalOnly];
 }
+
+/// 
+def InternalPluginBase : Attr {
+  let Spellings = [];
+  let Documentation = [InternalOnly];
+  //  let ASTNode = 1;
+  let ExtraSupers = ["public llvm::RTTIExtends<InternalPluginBaseAttr, llvm::RTTIRoot>"];
+let OnlyCustomMembers = 1;
+let AdditionalMembers = [{
+
+public:
+  InternalPluginBaseAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo)
+    : Attr(Ctx, CommonInfo, attr::InternalPluginBase, false) {}
+
+  static char ID;
+
+  static bool classof(const Attr *A) {
+    if (A->getKind() != attr::InternalPluginBase)
+      return false;
+    const InternalPluginBaseAttr *R = static_cast<const InternalPluginBaseAttr *>(A);
+    return R->isA(&InternalPluginBaseAttr::ID);
+  }
+
+  virtual const char *getName() const = 0;
+
+  virtual const char *getSpelling() const = 0;
+  virtual Attr *clone(ASTContext &C) const = 0;
+
+  virtual void printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const = 0;
+
+
+}];
+}
+
 
 //
 // Attributes begin here

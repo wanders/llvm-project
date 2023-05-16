@@ -3025,6 +3025,7 @@ void CodeGenModule::SetFunctionAttributes(GlobalDecl GD, llvm::Function *F,
                                                CalleeIdx, PayloadIndices,
                                                /* VarArgsArePassed */ false)}));
   }
+  // delegate to plugin?
 }
 
 void CodeGenModule::addUsedGlobal(llvm::GlobalValue *GV) {
