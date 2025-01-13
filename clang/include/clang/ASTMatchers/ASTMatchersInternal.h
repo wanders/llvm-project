@@ -1266,6 +1266,33 @@ public:
   }
 };
 
+/// Matches a node based on a callback function (e.g lambda)
+///
+/// This is useful as a buildingblock for creating match functions
+/// e.g:
+///   auto hasAttr() {
+///      return internal::SingleNodeCallbackMatcher<Decl>::Create(
+///               [](const Decl &N){ return N.hasAttr<AttrType>(); }
+///      );
+///   }
+template<class T>
+class SingleNodeCallbackMatcher : public SingleNodeMatcherInterface<T> {
+public:
+  using CallbackTy = bool(*)(const T &);
+  explicit SingleNodeCallbackMatcher(CallbackTy CB) : CB(CB) {}
+
+  bool matchesNode(const T &Node) const override {
+    return CB(Node);
+  }
+
+  static clang::ast_matchers::internal::Matcher<T> Create(CallbackTy CB) {
+    return clang::ast_matchers::internal::Matcher<T> (new SingleNodeCallbackMatcher(CB));
+  }
+private:
+  const CallbackTy CB;
+};
+
+
 /// Creates a Matcher<T> that matches if all inner matchers match.
 template <typename T>
 BindableMatcher<T>
