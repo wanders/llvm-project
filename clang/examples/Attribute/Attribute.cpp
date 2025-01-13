@@ -15,6 +15,7 @@
 
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Attr.h"
+#include "clang/AST/AttributePlugin.h"
 #include "clang/Sema/ParsedAttr.h"
 #include "clang/Sema/Sema.h"
 #include "clang/Sema/SemaDiagnostic.h"
@@ -22,6 +23,27 @@
 using namespace clang;
 
 namespace {
+
+class ExampleAttr : public PluginAttribute<ExampleAttr> {
+public:
+  static char ID;
+
+  ExampleAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo, SmallVector<Expr *, 16> Args) : PluginAttribute<ExampleAttr>(Ctx, CommonInfo), Args(Args) {}
+
+  const char *getName() const override { return "ExampleAttr"; }
+
+  const char *getSpelling() const override {return "EXAMPLE ATTRIBUTE";}
+  Attr *clone(ASTContext &C) const override {return nullptr; /*Create(C, *this);*/}
+  void printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const override {
+    /* ... */
+  }
+
+private:
+  SmallVector<Expr *, 16> Args;
+
+};
+char ExampleAttr::ID = 0;
+
 
 struct ExampleAttrInfo : public ParsedAttrInfo {
   ExampleAttrInfo() {
@@ -85,12 +107,11 @@ struct ExampleAttrInfo : public ParsedAttrInfo {
       for (unsigned i = 0; i < Attr.getNumArgs(); i++) {
         ArgsBuf.push_back(Attr.getArgAsExpr(i));
       }
-      D->addAttr(AnnotateAttr::Create(S.Context, "example", ArgsBuf.data(),
-                                      ArgsBuf.size(), Attr.getRange()));
+      D->addAttr(ExampleAttr::Create(S.Context, Attr, ArgsBuf));
     } else {
-      // Attach an annotate attribute to the Decl.
-      D->addAttr(AnnotateAttr::Create(S.Context, "example", nullptr, 0,
-                                      Attr.getRange()));
+      // Attach an Example attribute to the Decl.
+      SmallVector<Expr *, 16> ArgsBuf;
+      D->addAttr(ExampleAttr::Create(S.Context, Attr, ArgsBuf));
     }
     return AttributeApplied;
   }
