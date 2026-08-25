@@ -73,3 +73,36 @@ void call_fscanf(void) {
   fscanf(0, "%19s %29s %9s", buf20, buf30, buf10);
   // expected-warning@-1 {{null passed to a callee that requires a non-null argument}}
 }
+
+struct res {
+  char b[5];
+};
+
+static struct res global_res;
+
+void test_struct_argtypes(const char *line, struct res *arg_res) {
+  struct res local_res;
+  struct res *global_res_p = &global_res;
+
+  sscanf(line, "%5s\n", local_res.b);     // expected-warning {{'sscanf' may overflow; destination buffer in argument 3 has size 5, but the corresponding specifier may require size 6}}
+  sscanf(line, "%5s\n", arg_res->b);      // No diag :(
+  sscanf(line, "%5s\n", global_res.b);    // expected-warning {{'sscanf' may overflow; destination buffer in argument 3 has size 5, but the corresponding specifier may require size 6}}
+  sscanf(line, "%5s\n", global_res_p->b); // No diag :(
+}
+
+struct res_extra {
+  char b[5];
+  char c;
+};
+
+static struct res_extra global_res_extra;
+
+void test_struct_extra(const char *line, struct res_extra *arg_res) {
+  struct res_extra local_res;
+  struct res_extra *global_res_extra_p = &global_res_extra;
+
+  sscanf(line, "%5s\n", local_res.b);           // No diag :(
+  sscanf(line, "%5s\n", arg_res->b);            // No diag :(
+  sscanf(line, "%5s\n", global_res_extra.b);    // No diag :(
+  sscanf(line, "%5s\n", global_res_extra_p->b); // No diag :(
+}

@@ -1194,7 +1194,7 @@ public:
     // If the parameter has a pass_object_size attribute, then we should use its
     // (potentially) more strict checking mode. Otherwise, conservatively assume
     // type 0.
-    int BOSType = 0;
+    int BOSType = 0; // XXX
     // This check can fail for variadic functions.
     if (Index < FD->getNumParams()) {
       if (const auto *POS =

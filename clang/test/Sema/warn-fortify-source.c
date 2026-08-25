@@ -49,6 +49,7 @@ void call_memcpy_type(void) {
   struct pair p;
   char buf[20];
   memcpy(&p.first, buf, 20); // expected-warning {{memcpy' will always overflow; destination buffer has size 8, but size argument is 20}}
+  memcpy(&p.first, buf, 5); // no warning, fits in struct
 }
 
 void call_strncat(void) {
@@ -73,6 +74,22 @@ void call_strcpy(void) {
   const char *const src = "abcd";
   char dst[4];
   __builtin_strcpy(dst, src); // expected-warning {{'strcpy' will always overflow; destination buffer has size 4, but the source string has length 5 (including NUL byte)}}
+}
+
+void call_strcpy_type(void) {
+  struct strcpy_dest {
+    char dst1[4];
+    char dst2[4];
+  };
+  struct strcpy_dest *strcpy_dest_p;
+
+  const char *const src = "abcd";
+  struct strcpy_dest dest;
+
+  __builtin_strcpy(strcpy_dest_p->dst2, src); // No diag :(
+  __builtin_strcpy(dest.dst2, src); // expected-warning {{'strcpy' will always overflow; destination buffer has size 4, but the source string has length 5 (including NUL byte)}}
+  __builtin_strcpy(strcpy_dest_p->dst1, src); // No diag :(
+  __builtin_strcpy(dest.dst1, src); // No diag :(
 }
 
 void call_strcpy_nowarn(void) {
